@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Partner = require("../models/Partner");
 const { getIO } = require("../socket");
@@ -19,7 +20,7 @@ const generateToken = (id, role) => {
 const registerUser = async (req, res) => {
   try {
 
-    const { name, phone, role } = req.body;
+    const { name, phone, role, password } = req.body;
 
     // check if user already exists
     let user = await User.findOne({ phone });
@@ -30,11 +31,14 @@ const registerUser = async (req, res) => {
       });
     }
 
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+
     // create user
     user = await User.create({
       name,
       phone,
-      role: role || "user"
+      role: role || "user",
+      password: hashedPassword
     });
 
     // 🔥 Emit socket event
@@ -133,7 +137,80 @@ const getMe = async (req, res) => {
 };
 
 
+// 🔹 Login with Password (MVP alternative to OTP)
+const loginWithPassword = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ message: "Phone and password are required" });
+    }
+
+    let user = await User.findOne({ phone });
+    let role = "user";
+
+    if (!user) {
+      user = await Partner.findOne({ phone });
+      role = "partner";
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({ message: "Password not set for this account. Please use OTP login." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    const token = generateToken(user._id, user.role || role);
+
+    res.json({
+      message: "Login successful",
+      token,
+      user
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Login failed", error: error.message });
+  }
+};
+
+// 🔹 Set or Update Password
+const setPassword = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ message: "Phone and password are required" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    let user = await User.findOneAndUpdate({ phone }, { password: hashed }, { new: true });
+    if (!user) {
+      user = await Partner.findOneAndUpdate({ phone }, { password: hashed }, { new: true });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    res.json({ message: "Password set successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Failed to set password", error: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
-  loginUser,getMe
+  loginUser,
+  loginWithPassword,
+  setPassword,
+  getMe
 };

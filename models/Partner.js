@@ -110,6 +110,11 @@ totalDeliveries: {
     default: ""
   },
 
+  password: {
+    type: String,
+    default: null,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
