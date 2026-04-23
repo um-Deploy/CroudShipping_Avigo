@@ -1,0 +1,32 @@
+16 March Add - file orderController.js
+
+   1) //Delivery OTP
+    // OTP Function by Arjun
+    try {
+      if (req.body.receiver && req.body.receiver.phone) {
+        await sendOTP(req.body.receiver.phone, deliveryOtp);
+        console.log(`Delivery OTP sent to ${req.body.receiver.phone}`);
+      }
+    } catch (smsError) {
+      console.error("SMS Delivery Failed:", smsError.message);
+      // We don't return an error to the user because the order is still valid
+    }
+
+
+
+2)
+
+Another - otpController
+await sendOTP(phone, otp);
+
+
+
+3)
+ //Delivery OTP
+    // OTP Function by Arjun
+    await sendOTP(String(req.body.receiver.phone), deliveryOtp);
+    console.log(`Delivery OTP sent to ${req.body.receiver.phone}`);
+
+
+
+ 

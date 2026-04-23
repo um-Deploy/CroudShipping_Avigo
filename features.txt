@@ -1,0 +1,48 @@
+ 
+ # Percentage logic
+ //----
+    // // 🛵 PARTNER DASHBOARD orginal
+    // if (role === "partner") {
+    //   const assigned = await Order.countDocuments({
+    //     partnerId: req.user.id,
+    //   });
+
+    //   const completed = await Order.countDocuments({
+    //     partnerId: req.user.id,
+    //     status: "delivered",
+    //   });
+
+    //   const active = await Order.countDocuments({
+    //     partnerId: req.user.id,
+    //     status: { $in: ["accepted", "picked", "in_transit"] },
+    //   });
+
+    //   const earningsAgg = await Order.aggregate([
+    //     {
+    //       $match: {
+    //         partnerId: new mongoose.Types.ObjectId(req.user.id),
+    //         status: "delivered",
+    //       },
+    //     },
+    //     {
+    //       $group: {
+    //         _id: null,
+    //         total: { $sum: "$price" },
+    //       },
+    //     },
+    //   ]);
+
+    //   const totalEarnings = earningsAgg[0]?.total || 0;
+
+    //   return res.json({
+    //     role,
+    //     assigned,
+    //     active,
+    //     completed,
+    //     totalEarnings,
+    //   });
+    // }
+
+
+
+    
